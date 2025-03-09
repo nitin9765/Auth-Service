@@ -1,22 +1,24 @@
 package com.edigest.authservice.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Generated;
+import lombok.*;
 
-import java.util.HashSet;
 import java.util.Set;
 @Entity
 @Table(name = "users")
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "user_id", updatable = false, nullable = false)
+    @EqualsAndHashCode.Include
     private String userId;
 
+    @Column(name="username", unique = true)
     private String username;
     private String password;
     private String name;

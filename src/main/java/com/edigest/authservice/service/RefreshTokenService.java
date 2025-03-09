@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,7 +26,7 @@ public class RefreshTokenService {
         RefreshToken token = RefreshToken.builder()
                 .user(user)
                 .token(UUID.randomUUID().toString())
-                .expiryDate(Instant.now().plusMillis(60 * 60 * 1000))
+                .expiryDate(Instant.now().plusMillis(60 * 60 * 1000L))
                 .build();
         return refreshTokenRepository.save(token);
     }
@@ -37,8 +38,10 @@ public class RefreshTokenService {
         }
         return token;
     }
-
+    public Optional<RefreshToken> findByUserId(User user){
+        return Optional.ofNullable(refreshTokenRepository.findByUser(user));
+    }
     public Optional<RefreshToken> findByToken(String token) {
-        return refreshTokenRepository.findByToken(token);
+        return Optional.ofNullable(refreshTokenRepository.findByToken(token));
     }
 }

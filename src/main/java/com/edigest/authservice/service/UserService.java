@@ -3,6 +3,7 @@ package com.edigest.authservice.service;
 import com.edigest.authservice.entity.User;
 import com.edigest.authservice.model.UserDto;
 import com.edigest.authservice.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -41,19 +42,18 @@ public class UserService implements UserDetailsService {
         return userRepository.findByUsername(username);
     }
 
+
     public User signUpUser(UserDto user){
         if(Boolean.TRUE.equals(alreadyExists(user.getUsername()))){
             return null;
         }
-        String userId=UUID.randomUUID().toString();
         User newUser=User.builder()
-                .userId(userId)
                 .username(user.getUsername())
+                .name(user.getName())
                 .password(passwordEncoder.encode(user.getPassword()))
                 .userRoles(new HashSet<>())
                 .build();
-        userRepository.save(newUser);
-        return newUser;
+        return userRepository.save(newUser);
     }
 
 
