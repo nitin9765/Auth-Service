@@ -20,25 +20,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth/v1")
 public class AuthController {
-    //    "/auth/v1/login",
-//            "/auth/v1/refreshToken",
-//            "/auth/v1/signup"
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    @Autowired
-    private JwtUtil jwtUtil;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private RefreshTokenService refreshTokenService;
 
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
+    private final UserService userService;
+    private final RefreshTokenService refreshTokenService;
+    AuthController(AuthenticationManager authenticationManager,
+                   JwtUtil jwtUtil,
+                   UserService userService,
+                   RefreshTokenService refreshTokenService){
+        this.userService=userService;
+        this.jwtUtil=jwtUtil;
+        this.refreshTokenService=refreshTokenService;
+        this.authenticationManager=authenticationManager;
+    }
     @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@RequestBody UserDto user) {
+    public ResponseEntity<Object> signUp(@RequestBody UserDto user) {
         try {
             Boolean isSignedUp = userService.signUpUser(user) == null;
             if (Boolean.TRUE.equals(isSignedUp)) {
@@ -52,19 +53,19 @@ public class AuthController {
                             .token(refreshToken.getToken())
                             .build(), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>("Exception in signUp", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Exception in signUp" + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequestDto authRequestDto) {
+    public ResponseEntity<Object> login(@RequestBody AuthRequestDto authRequestDto) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         authRequestDto.getUsername(),
                         authRequestDto.getPassword()
                 ));
         if (authentication.isAuthenticated()) {
-            User user=userService.findByUsername(authRequestDto.getUsername());
+            User user = userService.findByUsername(authRequestDto.getUsername());
             RefreshToken refreshToken = refreshTokenService.findByUserId(user)
                     .orElseGet(() -> refreshTokenService.createRefreshToken(authRequestDto.getUsername()));
             return new ResponseEntity<>(
@@ -77,17 +78,16 @@ public class AuthController {
     }
 
     @PostMapping("/refreshToken")
-    public JwtResponseDto refreshToken(@RequestBody RefreshTokenRequestDto refreshTokenRequestDto){
+    public JwtResponseDto refreshToken(@RequestBody RefreshTokenRequestDto refreshTokenRequestDto) {
         return refreshTokenService.findByToken(refreshTokenRequestDto.getToken())
                 .map(refreshTokenService::isExpired)
                 .map(RefreshToken::getUser)
-                .map(userInfo-> {
+                .map(userInfo -> {
                     String accessToken = jwtUtil.generateToken(userInfo.getUsername());
                     return JwtResponseDto.builder()
                             .accessToken(accessToken)
                             .token(refreshTokenRequestDto.getToken())
                             .build();
-                }).orElseThrow(()->new RuntimeException("Refresh Token not found in DB"));
+                }).orElseThrow(() -> new RuntimeException("Refresh Token not found in DB"));
     }
-
 }
