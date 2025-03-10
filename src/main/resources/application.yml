@@ -2,7 +2,7 @@ spring:
   application:
     name: authService
   datasource:
-    url: jdbc:postgresql://localhost:5432/tracker
+    url: jdbc:postgresql://localhost:5432/authDb
     username: postgres
     password: root
     driver-class-name: org.postgresql.Driver

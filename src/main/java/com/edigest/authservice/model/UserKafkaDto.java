@@ -7,6 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class UserKafkaDto {
+    private String userId;
     private String name;
     private String phoneNumber;
     private String email;

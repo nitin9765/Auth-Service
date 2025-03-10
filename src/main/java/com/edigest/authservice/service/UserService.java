@@ -59,9 +59,10 @@ public class UserService implements UserDetailsService {
                     .password(passwordEncoder.encode(user.getPassword()))
                     .userRoles(new HashSet<>())
                     .build();
-            userRepository.save(newUser);
+            newUser=userRepository.save(newUser);
             // sending kafka event
             UserKafkaDto userKafkaDto = UserKafkaDto.builder()
+                    .userId(newUser.getUserId())
                     .email(user.getEmail())
                     .name(user.getName())
                     .phoneNumber(user.getPhoneNumber()).build();
