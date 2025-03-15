@@ -18,22 +18,17 @@ spring:
       ddl-auto: update
   kafka:
     bootstrap-servers: ${KAFKA_SERVER:localhost}:9092
-    consumer:
-      bootstrap-servers: ${KAFKA_SERVER:localhost}:9092
-      group-id: group_id
-      auto-offset-reset: earliest
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     producer:
       bootstrap-servers: ${KAFKA_SERVER:localhost}:9092
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     topic:
-      name: testingJson
+      name: user_details
 server:
-  port: 8082
+  port: 8081
 
 logging:
   level:
-    root: INFO
-    org.springframework.jdbc.datasource.DriverManagerDataSource: DEBUG
+    root: ${ENVIRONMENT:INFO}
+    org.apache.kafka: WARN
+    kafka: WARN

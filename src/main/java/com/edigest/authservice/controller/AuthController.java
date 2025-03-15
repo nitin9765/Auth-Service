@@ -15,10 +15,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 
 @RestController
@@ -89,5 +89,17 @@ public class AuthController {
                             .token(refreshTokenRequestDto.getToken())
                             .build();
                 }).orElseThrow(() -> new RuntimeException("Refresh Token not found in DB"));
+    }
+
+    @GetMapping("/authenticator")
+    public ResponseEntity<String> getPing(){
+        Authentication authentication=SecurityContextHolder.getContext().getAuthentication();
+        if(authentication!=null && authentication.isAuthenticated()){
+            User user=userService.findByUsername(authentication.getName());
+            if(Objects.nonNull(user)) {
+                return ResponseEntity.ok(user.getUserId());
+            }
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
     }
 }
